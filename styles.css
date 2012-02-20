@@ -1,0 +1,85 @@
+#error {
+  color: #FF0000;
+}
+
+.grade-report-user table#user-grade .datesubmitted {
+  font-size: 0.7em;
+}
+
+.grade-report-user table#user-grade .courseitem,
+.grade-report-user table#user-grade .categoryitem {
+  font-weight: bold;
+}
+
+
+.grade-report-projected td {
+  height: 25px;
+}
+
+.grade-report-projected .categoryitem {
+display: block;
+padding-top: 10px;
+padding-bottom: 10px;
+background-color: #eee;
+height: 24px;
+}
+
+.grade-report-projected .invisitext {
+display: none;
+}
+
+
+.grade-report-projected .courseitem {
+display: block;
+padding-top: 15px;
+padding-bottom: 15px;
+background-color: #ddd;
+color: #333;
+height: 24px;
+}
+
+.grade-report-projected span {
+padding: 5px;
+}
+
+.enabled_projected_error {
+    color: red;
+    text-align: center;
+}
+
+/* this must be last if we want to override other category and course item colors */
+.grade-report-user table#user-grade .hidden,
+.grade-report-user table#user-grade .hidden a {
+  color:#aaaaaa;
+}
+
+.must_make_table {
+    width: 100px !important;
+}
+
+#must_make {
+    border: 1px solid #00FF00;
+    width: 100px;
+}
+
+.must_make_highlight {
+    border: 1px solid #00FF00;
+}
+
+.must_make_arrow {
+    color: #00FF00;
+    margin-right: -60px;
+    font-size: 20px;
+}
+
+.projected_error {
+    color: red;
+}
+
+.projected_error:after {
+    content: ' (error)';
+}
+
+#grade-report-projected-index td.cell.c2 {
+    width: 343px;
+}

@@ -15,6 +15,8 @@ $(document).ready(function() {
             hideError(id);
         } else if (e.keyCode > 64 && e.keyCode < 91) {
             showError(id);
+        } else {
+            return;
         }
 
         if (errorsExist()) {
@@ -95,12 +97,12 @@ function validInput(value, e) {
     if (key >= 96 && key <= 105) { return true }
 
     // Ignored keys: tab, backspace, etc
-    if ($.inArray(key, [8, 9, 13, 46])) { return true }
+    if ($.inArray(key, [8, 46]) != -1) { return true }
 
     // Modifier Keys
     if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) { return false }
 
-    return true;
+    return false;
 }
 
 function position_must_make(item_id) {
@@ -139,7 +141,6 @@ function recalculate(elem) {
             if ($(this).val() == '') {
                 num_empty++;
                 must_make_item_id = $(this).attr('id').split('_')[2];
-                console.log($(this));
             }
         });
 

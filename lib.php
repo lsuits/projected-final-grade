@@ -272,6 +272,8 @@ class grade_report_projected extends grade_report {
                 $cat_data->droplow = $cat->droplow;
                 $cat_data->keephigh = $cat->keephigh;
                 $cat_data->path = $cat->path;
+                $cat_data->grademax = $cat->get_grade_item()->grademax;
+
                 $this->ajax_data['categories'][$cat->id] = $cat_data;
             }
 
@@ -303,11 +305,12 @@ class grade_report_projected extends grade_report {
                 $item_data->excluded = $grade_grade->excluded;
 
                 if ($grade_item->itemtype == 'category') {
-                    $item_data->categoryid = $grade_item->iteminstance; 
+                    $item_data->categoryid = $grade_item->iteminstance;
                     $item_data->parent = $cat->parent;
                     $this->ajax_data['categories'][$grade_item->iteminstance]->calculation = $grade_item->calculation;
                 } else {
                     $item_data->categoryid = $grade_item->categoryid; 
+                    $item_data->parent = null;
                 }
 
                 $item_data->value = $grade_grade->finalgrade;

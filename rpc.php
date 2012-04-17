@@ -152,8 +152,7 @@ function prepare_for_aggregation($catid, $categories, $items, $course_total) {
         // If we are not aggregating subcategories, we only need this category's
         // immediate items and the category totals inside it.
         foreach ($items as $id => $item) {
-            if (($item->categoryid == $catid && $item->itemtype != 'category') || 
-                ($course_total && $item->parent == $catid)) {
+            if (($item->categoryid == $catid && $item->itemtype != 'category') || ($course_total && $item->parent == $catid)) {
                 // An immediate item has been found.
                 $required_items[] = $id;
             } else if (!(strpos($categories[$item->categoryid]->path, $categories[$catid]->path) === false)) {
@@ -287,6 +286,7 @@ function aggregate_category($items, $catid, $categories, $course_total=false) {
     if ($cat_obj->aggregation == GRADE_AGGREGATE_SUM) {
         $agg_grade = projected_sum_grades($catid, $cat_obj, $grade_values, $cat_items);
     } else {
+        $cat_obj->grade_item->grademax = $categories[$catid]->grademax;
         $agg_grade = $cat_obj->aggregate_values($grade_values, $cat_items);
     }
 
@@ -317,12 +317,8 @@ function compute_categories($items, $categories) {
         $plusfactor = $items[$lookup[$catid]]->plusfactor;
         $multfactor = $items[$lookup[$catid]]->multfactor;
 
-        //print_r($items);
-
         $items[$lookup[$catid]]->value = ($finalgrade * $multfactor) + $plusfactor;
         $items[$lookup[$catid]]->aggregated = true;
-
-        //print_r($items);
     }
 
     return $items;
@@ -337,10 +333,6 @@ function projected_sum_grades($catid, $cat_obj, $grade_values, $items) {
         if (is_null($v)) {
             unset($grade_values[$itemid]);
         }
-        /* else if (in_array($itemid, $excluded)) {
-            unset($grade_values[$itemid]);
-        }
-        */
     }
 
     // use 0 if grade missing, droplow used and aggregating all items
@@ -359,13 +351,6 @@ function projected_sum_grades($catid, $cat_obj, $grade_values, $items) {
     foreach ($items as $item) {
         if ($item->aggregationcoef > 0) {
             // extra credit from this activity - does not affect total
-            /*
-            $valid = (
-                ($this->aggregation != GRADE_AGGREGATE_WEIGHTED_MEAN && $coef > 0) ||
-                $coef < 0
-            );
-            $cat_obj->is_extracredit_used() and $valid
-            */
             continue;
         }
 

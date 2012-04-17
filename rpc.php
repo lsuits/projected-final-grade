@@ -359,6 +359,13 @@ function projected_sum_grades($catid, $cat_obj, $grade_values, $items) {
     foreach ($items as $item) {
         if ($item->aggregationcoef > 0) {
             // extra credit from this activity - does not affect total
+            /*
+            $valid = (
+                ($this->aggregation != GRADE_AGGREGATE_WEIGHTED_MEAN && $coef > 0) ||
+                $coef < 0
+            );
+            $cat_obj->is_extracredit_used() and $valid
+            */
             continue;
         }
 

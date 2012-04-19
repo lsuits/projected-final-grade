@@ -491,8 +491,7 @@ function grade_report_projected_settings_definition(&$mform) {
     }
 
     $mform->addElement('select', 'report_projected_showhiddenitems', get_string('showhiddenitems', 'grades'), $options);
-    $mform->setHelpButton('report_projected_showhiddenitems', array(false, get_string('showhiddenitems', 'grades'),
-                          false, true, false, get_string('configshowhiddenitems', 'grades')));
+    $mform->addHelpButton('report_projected_showhiddenitems', 'showhiddenitems', 'grades');
 
     $options = array(-1 => get_string('default', 'grades'),
                       0 => get_string('no'),

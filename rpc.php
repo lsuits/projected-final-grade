@@ -21,6 +21,63 @@ require_once($CFG->libdir . '/grade/grade_category.php');
 INI_SET('max_execution_time', '600');
 
   //////////////////////////
+ //  WRAP GRADE OBJECTS  //
+//////////////////////////
+
+class grade_projected {
+    var $grade_item;
+
+    public function __construct($grade_item) {
+        $this->grade_item = $grade_item;
+    }
+
+    public function __call($name, $args) {
+        if (method_exists($this->grade_item, $name)) {
+            return call_user_func_array(array($this->grade_item, $name), $args);
+        }
+
+        return null;
+    }
+
+    public function __get($name) {
+        if (isset($this->grade_item->$name)) {
+            return $this->grade_item->$name;
+        }
+
+        return null;
+    }
+
+    public function __set($name, $value) {
+        $this->grade_item->$name = $value;
+    }
+
+    public function __isset($name) {
+        return isset($this->grade_item->$name);
+    }
+
+    public function bounded_grade($gradevalue) {
+        global $CFG;
+
+        if (is_null($gradevalue)) {
+            return null;
+        }
+
+        if ($this->gradetype == GRADE_TYPE_SCALE) {
+            // no >100% grades hack for scale grades!
+            // 1.5 is rounded to 2 ;-)
+            return (int)bounded_number($this->grademin, round($gradevalue+0.00001), $this->grademax);
+        }
+
+        // NOTE: if you change this value you must manually reset the needsupdate flag in all grade items
+        $maxcoef = isset($CFG->gradeoverhundredprocentmax) ? $CFG->gradeoverhundredprocentmax : 10; // 1000% max by default
+
+        $grademax = $this->grademax * $maxcoef;
+
+        return (float)bounded_number($this->grademin, $gradevalue, $grademax);
+    }
+}
+
+  //////////////////////////
  //  INTERNAL FUNCTIONS  //
 //////////////////////////
 
@@ -372,10 +429,11 @@ function projected_sum_grades($catid, $cat_obj, $grade_values, $items) {
 }
 
 // Writes a response string to be handled by javascript when the request
-// returns. Gleans data from the $items array for the textboxes whose values 
+// returns. Gleans data from the $items array for the textboxes whose values
 // need to be updated on the page.
 function prepare_response_string($items) {
     $out = '';
+
     foreach ($items as $id => $item) {
         $calculated = isset($item->calculated) and $item->calculated;
         $aggregated = isset($item->aggregated) and $item->aggregated;
@@ -513,6 +571,24 @@ $categories = $course_data['categories'];
 $course_total = $course_data['course_total'];
 $letters = $course_data['letters'];
 unset($course_data);
+
+$new_items = array();
+
+foreach ($items as $k => $item) {
+   $new_items[$k] = new grade_projected($item);
+}
+
+$items = $new_items;
+
+$new_categories = array();
+
+foreach ($categories as $k => $category) {
+   $new_categories[$k] = new grade_projected($category);
+}
+
+$categories = $new_categories;
+
+$course_total = new grade_projected($course_total);
 
 // Add the new grades from textboxes to the items array
 $new_grades = read_new_grades($inputs);

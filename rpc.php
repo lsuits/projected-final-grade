@@ -422,14 +422,13 @@ function projected_sum_grades($catid, $cat_obj, $grade_values, $items) {
         }
     }
 
-    $cat_obj->apply_limit_rules($grade_values);
+    $cat_obj->apply_limit_rules($grade_values, $items);
 
     $sum = array_sum($grade_values);
 
     $finalgrade = bounded_number(0, $sum, $max);
 
     return $finalgrade;
-
 }
 
 // Writes a response string to be handled by javascript when the request

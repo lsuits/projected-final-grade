@@ -363,6 +363,10 @@ function compute_categories($items, $categories) {
     foreach ($order as $catid) {
         $agg_grade = aggregate_category($items, $catid, $categories);
 
+        if (empty($lookup[$catid]) or empty($items[$lookup[$catid]])) {
+            continue;
+        }
+
         if ($categories[$catid]->aggregation == GRADE_AGGREGATE_SUM) {
             $finalgrade = $agg_grade;
         } else {
@@ -382,7 +386,7 @@ function compute_categories($items, $categories) {
 }
 
 // All checks for GRADE_AGGREGATE_SUM are new as well
-// This function is a tweaked copy of grade_category's sum_graded method. It 
+// This function is a tweaked copy of grade_category's sum_graded method. It
 // must be pulled out and tweaked so we don't save anything to the database.
 function projected_sum_grades($catid, $cat_obj, $grade_values, $items) {
     // ungraded and exluded items are not used in aggregation
@@ -533,7 +537,6 @@ function calculate_must_make($item_id, $letters, $course_total, $items, $categor
 
         $last_bound = $bound;
     }
-
 
     $out = '';
 

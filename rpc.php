@@ -341,7 +341,7 @@ function aggregate_category($items, $catid, $categories, $course_total=false) {
     }
 
     if ($cat_obj->aggregation == GRADE_AGGREGATE_SUM) {
-        $agg_grade = projected_sum_grades($catid, $cat_obj, $grade_values, $cat_items);
+        $agg_grade = projected_sum_grades($cat_obj, $cat_items, $grade_values);
     } else {
         $cat_obj->grade_item->grademax = $categories[$catid]->grademax;
         $agg_grade = $cat_obj->aggregate_values($grade_values, $cat_items);
@@ -385,50 +385,36 @@ function compute_categories($items, $categories) {
     return $items;
 }
 
-// All checks for GRADE_AGGREGATE_SUM are new as well
-// This function is a tweaked copy of grade_category's sum_graded method. It
-// must be pulled out and tweaked so we don't save anything to the database.
-function projected_sum_grades($catid, $cat_obj, $grade_values, $items) {
-    // ungraded and exluded items are not used in aggregation
+function projected_sum_grades($cat_obj, $items, $grade_values) {
+    if (empty($items)) {
+        return null;
+    }
+
+    // ungraded and excluded items are not used in aggregation
     foreach ($grade_values as $itemid=>$v) {
+
         if (is_null($v)) {
+            unset($grade_values[$itemid]);
+
+        } else if ($items[$itemid]->excluded) {
             unset($grade_values[$itemid]);
         }
     }
 
     // use 0 if grade missing, droplow used and aggregating all items
     if (!$cat_obj->aggregateonlygraded and !empty($cat_obj->droplow)) {
-        foreach($items as $itemid=>$value) {
-            // if (!isset($grade_values[$itemid]) and !in_array($itemid, $excluded)) {
-            if (!isset($grade_values[$itemid])) {
+
+        foreach ($items as $itemid=>$value) {
+
+            if (!isset($grade_values[$itemid]) and $items[$itemid]->excluded) {
                 $grade_values[$itemid] = 0;
             }
         }
     }
 
-    $max = 0;
-
-    //find max grade
-    foreach ($items as $item) {
-        if ($item->aggregationcoef > 0) {
-            // extra credit from this activity - does not affect total
-            continue;
-        }
-
-        if ($item->gradetype == GRADE_TYPE_VALUE) {
-            $max += $item->grademax;
-        } else if ($item->gradetype == GRADE_TYPE_SCALE) {
-            $max += $item->grademax - 1; // scales min is 1
-        }
-    }
-
     $cat_obj->apply_limit_rules($grade_values, $items);
 
-    $sum = array_sum($grade_values);
-
-    $finalgrade = bounded_number(0, $sum, $max);
-
-    return $finalgrade;
+    return array_sum($grade_values);
 }
 
 // Writes a response string to be handled by javascript when the request
@@ -487,7 +473,8 @@ function calculate_must_make($item_id, $letters, $course_total, $items, $categor
     foreach ($letters as $bound => $letter) {
         $min = $items[$item_id]->grademin;
         $max = $items[$item_id]->grademax;
-        $bound = round($bound, 2);
+
+        $bound = $course_total->grademax * round($bound, 2) / 100;
 
         $ct_value = null;
 

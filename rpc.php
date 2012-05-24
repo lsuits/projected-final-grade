@@ -330,8 +330,6 @@ function aggregate_category($items, $catid, $categories, $course_total=false) {
     $cat_obj = new grade_category(array('aggregation' => $categories[$catid]->aggregation,
        'droplow' => $categories[$catid]->droplow, 'keephigh' => $categories[$catid]->keephigh), false);
 
-    // Apply limit rules (droplow, keephigh) and sort
-    $cat_obj->apply_limit_rules($grade_values, $items);
     asort($grade_values, SORT_NUMERIC);
 
     foreach ($cat_items as $k => $cat_item) {
@@ -344,6 +342,7 @@ function aggregate_category($items, $catid, $categories, $course_total=false) {
         $agg_grade = projected_sum_grades($cat_obj, $cat_items, $grade_values);
     } else {
         $cat_obj->grade_item->grademax = $categories[$catid]->grademax;
+        $cat_obj->apply_limit_rules($grade_values, $items);
         $agg_grade = $cat_obj->aggregate_values($grade_values, $cat_items);
     }
 

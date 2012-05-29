@@ -542,6 +542,8 @@ function calculate_must_make($item_id, $letters, $course_total, $items, $categor
 // We don't want arbitrary requests being made to this page
 require_login();
 
+$PAGE->set_context(null);
+
 // Read the post data and mold it into something useful
 $inputs = explode('|', required_param('inputdata', PARAM_RAW));
 

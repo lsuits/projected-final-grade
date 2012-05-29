@@ -108,7 +108,7 @@ class grade_report_projected extends grade_report {
          * Table has 5-6 columns
          *| itemname | category | final grade |
          */
-         
+
         // adamzap
         // Edited table headers
 
@@ -165,25 +165,8 @@ class grade_report_projected extends grade_report {
             require_once($CFG->dirroot. '/grade/report/simple_grader/lib/simple_grade_hook.php');
         }
 
-        if ($canviewhidden) {
-            $altered = array();
-            $unknown = array();
-        } else {
-            // Removing checks for hidden grades (adamzap)
-            /*
-        	if (file_exists($file)) {
-        		$hiding_affected = simple_get_hiding_affected($grades, $items);
-            } else {
-                $hiding_affected = grade_grade::get_hiding_affected($grades, $items);
-            }
-            */
-
-            $hiding_affected = array();
-
-            $altered = $hiding_affected['altered'];
-            $unknown = $hiding_affected['unknown'];
-            unset($hiding_affected);
-        }
+        $altered = array();
+        $unknown = array();
 
         foreach ($items as $itemid=>$unused) {
             $grade_item  =& $items[$itemid];
@@ -223,7 +206,7 @@ class grade_report_projected extends grade_report {
                 $class = 'courseitem';
             } else if ($grade_item->is_category_item()) {
                 $class = 'categoryitem';
-               
+
                 // make category totals invisible to students
                 if (!$this->showhiddenitems) {
                     if (!$canviewhidden && $grade_item->is_hidden()) {
@@ -234,9 +217,9 @@ class grade_report_projected extends grade_report {
                 }
             }
 
-            if (in_array($itemid, $unknown)) {
+            if (!empty($unknown) and in_array($itemid, $unknown)) {
                 $gradeval = null;
-            } else if (array_key_exists($itemid, $altered)) {
+            } else if (!empty($altered) and array_key_exists($itemid, $altered)) {
                 $gradeval = $altered[$itemid];
             } else {
                 $gradeval = $grade_grade->finalgrade;
@@ -280,7 +263,7 @@ class grade_report_projected extends grade_report {
             // insert grade and item data into the ajax data array
             if ($grade_item->itemtype != 'course') {
                 $item_data = new stdClass;
-                
+
                 if ($grade_item->calculation) {
                     $item_data->calculation = $grade_item->calculation;
                     $item_data->calculated = false;

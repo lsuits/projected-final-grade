@@ -25,5 +25,5 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2012021500;
+$plugin->version   = 2013081000;
 $plugin->component = 'gradereport_projected';

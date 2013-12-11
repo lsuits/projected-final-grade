@@ -80,6 +80,10 @@ padding: 5px;
     content: ' (error)';
 }
 
-#grade-report-projected-index td.cell.c2 {
+#page-grade-report-projected-index td.cell.c2 {
     width: 343px;
+}
+
+#page-grade-report-projected-index div.no-overflow>table#user-grade {
+   margin-top: 3em;
 }

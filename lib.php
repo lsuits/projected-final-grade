@@ -146,7 +146,7 @@ class grade_report_projected extends grade_report {
         $items =& $this->gseq->items;
         $grades = array();
 
-        $canviewhidden = has_capability('moodle/grade:viewhidden', get_context_instance(CONTEXT_COURSE, $this->courseid));
+        $canviewhidden = has_capability('moodle/grade:viewhidden', context_course::instance($this->courseid));
 
         // fetch or create all grades
         foreach ($items as $key=>$unused) {
@@ -415,7 +415,7 @@ class grade_report_projected extends grade_report {
             $this->table->add_data($data);
         }
 
-        $context = get_context_instance(CONTEXT_COURSE, $grade_item->courseid);
+        $context = context_course::instance($grade_item->courseid);
         $the_letters = grade_get_letters($context);
         array_pop($the_letters);
         $this->ajax_data['letters'] = $the_letters;
@@ -506,7 +506,7 @@ function grade_report_projected_settings_definition(&$mform) {
 function grade_report_projected_profilereport($course, $user) {
     if (!empty($course->showgrades)) {
 
-        $context = get_context_instance(CONTEXT_COURSE, $course->id);
+        $context = context_course::instance($course->id);
 
         //first make sure we have proper final grades - this must be done before constructing of the grade tree
         grade_regrade_final_grades($course->id);
@@ -535,7 +535,7 @@ function print_projected_graded_users_selector($course, $actionpage, $userid=nul
         $userid = $USER->id;
     }
 
-    $context = get_context_instance(CONTEXT_COURSE, $course->id);
+    $context = context_course::instance($course->id);
 
     $menu = array(); // Will be a list of userid => user name
 

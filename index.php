@@ -50,7 +50,7 @@ if (!$user = get_complete_user_data('id', $userid)) {
     print_error('Incorrect userid');
 }
 
-$context = get_context_instance(CONTEXT_COURSE, $course->id);
+$context = context_course::instance($course->id);
 
 require_capability('gradereport/projected:view', $context);
 
@@ -67,7 +67,7 @@ $access = false;
 
 $view_all = has_capability('moodle/grade:viewall', $context);
 $view_own = $userid == $USER->id and has_capability('moodle/grade:view', $context) and $course->showgrades;
-$view_user = has_capability('moodle/grade:viewall', get_context_instance(CONTEXT_USER, $userid)) and $course->showgrades;
+$view_user = has_capability('moodle/grade:viewall', context_user::instance($userid)) and $course->showgrades;
 
 if (!($view_all or $view_own or $view_user)) {
     print_error('nopermissiontoviewgrades', 'error',  $CFG->wwwroot.'/course/view.php?id=' . $courseid);

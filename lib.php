@@ -326,7 +326,7 @@ class grade_report_projected extends grade_report {
                 $data[] = '<span class="'.$hidden.$class.' datesubmitted">'.$excluded.get_string('submittedon', 'grades', userdate($grade_grade->get_datesubmitted(), get_string('strftimedatetimeshort'))).'</span>';
 
             } else {
-                if (is_null($gradeval)) {
+                if (is_null($gradeval) && !$grade_grade->is_excluded()) {
                 // adamzap
                 // Fill course total data for aggregation
                     if ($grade_item->itemtype == 'course') {

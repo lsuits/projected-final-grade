@@ -109,10 +109,9 @@ function position_must_make(item_id) {
     var parent_cell = $('#calc_grade_' + item_id).parent().parent();
 
     var left_pos = parent_cell.position().left + parent_cell.width() + 20;
-    var top_pos = parent_cell.position().top - parent_cell.height() - 35;
 
     $('#must_make').css('left', left_pos + 'px')
-    $('#must_make').css('top', top_pos + 'px')
+    $('#must_make').css('bottom', '20' + 'px')
 }
 
 function update_must_make(data) {

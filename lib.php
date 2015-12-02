@@ -1,5 +1,5 @@
 <?php // $Id: lib.php,v 1.18.2.12 2007-11-01 11:45:04 skodak Exp $
-
+//
 ///////////////////////////////////////////////////////////////////////////
 //                                                                       //
 // NOTICE OF COPYRIGHT                                                   //
@@ -59,7 +59,7 @@ class grade_report_projected extends grade_report {
     /**
      * Flat structure similar to grade tree
      */
-    var $gseq;
+    var $gtree;
 
     /**
      * Show hidden items even when user does not have required cap
@@ -85,8 +85,14 @@ class grade_report_projected extends grade_report {
 
         $switch = grade_get_setting($this->courseid, 'aggregationposition', $CFG->grade_aggregationposition);
 
+        if (empty($CFG->enableoutcomes)) {
+            $nooutcomes = false;
+        } else {
+            $nooutcomes = get_user_preferences('grade_report_shownooutcomes');
+        }
+
         // Grab the grade_seq for this course
-        $this->gseq = new grade_seq($this->courseid, $switch);
+        $this->gtree = new grade_tree($this->courseid, true, $switch, $nooutcomes);
 
         // get the user (for full name)
         $this->user = $DB->get_record('user', array('id' => $userid));
@@ -143,7 +149,7 @@ class grade_report_projected extends grade_report {
         global $CFG;
 
         $numusers = $this->get_numusers(false); // total course users
-        $items =& $this->gseq->items;
+        $items =& $this->gtree->items;
         $grades = array();
 
         $canviewhidden = has_capability('moodle/grade:viewhidden', context_course::instance($this->courseid));
@@ -233,8 +239,9 @@ class grade_report_projected extends grade_report {
                 $hidden = ' hidden ';
             }
 
-            $element = $this->gseq->locate_element($this->gseq->get_item_eid($grade_item));
-            $header = $this->gseq->get_element_header($element, true, true, true);
+            $eid = $this->gtree->get_item_eid($grade_item);
+            $element = $this->gtree->locate_element($eid);
+            $header = $this->gtree->get_element_header($element, true, true, true, true, true);
 
             /// prints grade item name
             $data[] = '<span class="'.$hidden.$class.'">'.$header.'</span>';
@@ -251,7 +258,7 @@ class grade_report_projected extends grade_report {
             if(!array_key_exists($cat->id, $this->ajax_data['categories']) && $cat->parent != '') {
                 $cat_data = new stdClass;
                 $cat_data->aggregation = $cat->aggregation;
-                $cat_data->aggregatesubcats = $cat->aggregatesubcats;
+//                $cat_data->aggregatesubcats = $cat->aggregatesubcats;
                 $cat_data->droplow = $cat->droplow;
                 $cat_data->keephigh = $cat->keephigh;
                 $cat_data->path = $cat->path;
@@ -335,7 +342,7 @@ class grade_report_projected extends grade_report {
                             $ct_data = new stdClass;
                             $ct_data->id = $ct_cat->id;
                             $ct_data->aggregation = $ct_cat->aggregation;
-                            $ct_data->aggregatesubcats = $ct_cat->aggregatesubcats;
+//                            $ct_data->aggregatesubcats = $ct_cat->aggregatesubcats;
                             $ct_data->droplow = $ct_cat->droplow;
                             $ct_data->keephigh = $ct_cat->keephigh;
                             $ct_data->path = $ct_cat->path;
@@ -367,7 +374,7 @@ class grade_report_projected extends grade_report {
                             $ct_data = new stdClass;
                             $ct_data->id = $ct_cat->id;
                             $ct_data->aggregation = $ct_cat->aggregation;
-                            $ct_data->aggregatesubcats = $ct_cat->aggregatesubcats;
+//                            $ct_data->aggregatesubcats = $ct_cat->aggregatesubcats;
                             $ct_data->droplow = $ct_cat->droplow;
                             $ct_data->keephigh = $ct_cat->keephigh;
                             $ct_data->path = $ct_cat->path;

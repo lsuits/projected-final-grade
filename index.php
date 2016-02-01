@@ -28,8 +28,7 @@ require_once $CFG->dirroot.'/grade/lib.php';
 require_once $CFG->dirroot.'/grade/report/projected/lib.php';
 
 $_s = function($key) { return get_string($key, 'gradereport_projected'); };
-
-$PAGE->requires->js('/grade/report/projected/js/jquery.js');
+$PAGE->requires->jquery();
 $PAGE->requires->js('/grade/report/projected/js/projected.js');
 
 $courseid = required_param('id', PARAM_INT);

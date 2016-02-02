@@ -70,8 +70,11 @@ function inRange(id) {
     var id = id.split('_')[2];
 
     var minmax = $('#minmax_' + id).attr('value').split('|');
-    var value = $('#calc_grade_' + id).attr('value');
+    // http://stackoverflow.com/questions/8312820/jquery-val-vs-attrvalue
+    // var value = $('#calc_grade_' + id).attr('value');
 
+    var value = $('#calc_grade_' + id).val();
+    var getthething = $('#calc_grade_' + id);
     var min = parseFloat(minmax[0]);
     var max = parseFloat(minmax[1]);
 

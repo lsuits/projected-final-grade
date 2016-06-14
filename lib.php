@@ -165,12 +165,6 @@ class grade_report_projected extends grade_report {
             $grades[$key]->grade_item =& $items[$key];
         }
 
-        $file = $CFG->dirroot. '/grade/report/simple_grader/lib/simple_gradelib.php';
-        if (file_exists($file)) {
-            require_once($file);
-            require_once($CFG->dirroot. '/grade/report/simple_grader/lib/simple_grade_hook.php');
-        }
-
         $altered = array();
         $unknown = array();
 

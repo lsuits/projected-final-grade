@@ -1,36 +1,29 @@
-var calc_id = null;
-var must_make_enabled = null;
-
 $(document).ready(function() {
-    must_make_enabled = $('#must_make_enabled').val() == '1' ? true : false;
+    initializeMustMake();
 
+    watchGradeValueInputChanges();
+});
+
+/**
+ * Initialize the state of the "must make" table, and perform calculation if only one missing grade item
+ */
+function initializeMustMake() {
     $('#must_make').hide();
     $('#must_make').css('position', 'absolute');
 
-    $(':input[id^=calc_]').keyup(function(e) {
-        var elem = e.currentTarget;
-        var id = $(this)[0].id.split('_')[2];
+    var sole_grade_element = getSoleEmptyGradeInputElement();
 
-        if (validInput(elem.value, e) && inRange(elem.id)) {
-            hideError(id);
-        } else if (e.keyCode > 64 && e.keyCode < 91) {
-            showError(id);
-        } else {
-            return;
-        }
+    recalculate(sole_grade_element);
+}
 
-        if (errorsExist()) {
-            hideTotals();
-        } else {
-            recalculate(elem);
-        }
-    });
-
-    // Make one initial calculation for must make if there is one empty input
+/**
+ * Returns an HTML input object of a single missing input if only one missing exists (false otherwise)
+ */
+function getSoleEmptyGradeInputElement() {
     var num_empty = null;
     var empty_elem = null;
 
-    $('input:text').each(function() {
+    $(':input[id^=calc_]').each(function() {
         if ($(this).val() == '') {
             num_empty++;
             empty_elem = $(this);
@@ -38,9 +31,85 @@ $(document).ready(function() {
     });
 
     if (num_empty == 1) {
-        recalculate(empty_elem[0]);
+        return empty_elem[0];
     }
-});
+
+    return false;
+}
+
+/**
+ * Watch for input grade values, recalculate and render output (or errors)
+ */
+function watchGradeValueInputChanges() {
+    $(':input[id^=calc_]').keyup(function(e) {
+        var updated_element = e.currentTarget;
+
+        // get the grade item id
+        var grade_item_id = $(this)[0].id.split('_')[2];
+
+        // validate input, render line item error if necessary
+        if (isValidInput(updated_element.value, e) && isInGradeRange(updated_element.id)) {
+            hideError(grade_item_id);
+        } else if (e.keyCode > 64 && e.keyCode < 91) {
+            showError(grade_item_id);
+        } else {
+            return;
+        }
+
+        if (errorsExist()) {
+            hideTotals();
+        } else {
+            recalculate(updated_element);
+        }
+    });
+}
+
+function mustMakeIsEnabled() {
+    return $('#must_make_enabled').val() == '1' ? true : false;
+}
+
+/**
+ * Checks that value is either a number or backspace with no modifier keys down
+ */
+function isValidInput(value, event) {
+    var key = event.keyCode;
+
+    // Integer
+    if (isFinite(parseInt(String.fromCharCode(key)))) { return true }
+
+    // Numpad keys
+    if (key >= 96 && key <= 105) { return true }
+
+    // Ignored keys: tab, backspace, etc
+    if ($.inArray(key, [8, 46]) != -1) { return true }
+
+    // Modifier Keys
+    if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) { return false }
+
+    return false;
+}
+
+/**
+ * Determine if the input value is within the range allowed by it's corresponding grade item
+ */
+function isInGradeRange(input_element_id) {
+    var grade_item_id = input_element_id.split('_')[2];
+
+    var minmax = $('#minmax_' + grade_item_id).attr('value').split('|');
+    var value = $('#' + input_element_id).val();
+    var min = parseFloat(minmax[0]);
+    var max = parseFloat(minmax[1]);
+
+    if (value >= min && value <= max) {
+        hideError(grade_item_id);
+
+        return true;
+    } else {
+        showError(grade_item_id);
+
+        return false;
+    }
+}
 
 function showError(id) {
     $('#' + id + '_range').addClass('projected_error')
@@ -48,6 +117,10 @@ function showError(id) {
 
 function hideError(id) {
     $('#' + id + '_range').removeClass('projected_error')
+}
+
+function errorsExist() {
+    return !! $('.projected_error').length;
 }
 
 function hideTotals() {
@@ -60,55 +133,20 @@ function hideTotals() {
     });
 }
 
-function errorsExist() {
-    return !!$('.projected_error').length;
+function getUngradedInputString() {
+    var inputs = [];
+
+    $('input:text[id^="calc_grade_"]').each(function(index) {
+        fieldval = $(this).val() == '' ? 'switch_me' : $(this).val();
+        inputs.push($(this).attr('id') + '=' + fieldval);
+    });
+
+    return inputs;
 }
 
-// Checks that the input value is within the range allowed by it's corresponding
-// grade item.
-function inRange(id) {
-    var id = id.split('_')[2];
 
-    var minmax = $('#minmax_' + id).attr('value').split('|');
-    // http://stackoverflow.com/questions/8312820/jquery-val-vs-attrvalue
-    // var value = $('#calc_grade_' + id).attr('value');
 
-    var value = $('#calc_grade_' + id).val();
-    var getthething = $('#calc_grade_' + id);
-    var min = parseFloat(minmax[0]);
-    var max = parseFloat(minmax[1]);
-
-    if (value >= min && value <= max) {
-        hideError(id);
-
-        return true;
-    } else {
-        showError(id);
-
-        return false;
-    }
-}
-
-// Checks that value is either a number or backspace with no modifier keys down
-function validInput(value, e) {
-    var key = e.keyCode;
-
-    // Integer
-    if (isFinite(parseInt(String.fromCharCode(key)))) { return true }
-
-    // Numpad keys
-    if (key >= 96 && key <= 105) { return true }
-
-    // Ignored keys: tab, backspace, etc
-    if ($.inArray(key, [8, 46]) != -1) { return true }
-
-    // Modifier Keys
-    if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) { return false }
-
-    return false;
-}
-
-function position_must_make(item_id) {
+function positionMustMake(item_id) {
     var parent_cell = $('#calc_grade_' + item_id).parent().parent();
 
     var left_pos = parent_cell.position().left + parent_cell.width() + 20;
@@ -117,7 +155,7 @@ function position_must_make(item_id) {
     $('#must_make').css('bottom', '20' + 'px')
 }
 
-function update_must_make(data) {
+function updateMustMake(data) {
     $('.must_make_table > tbody > tr > td').each(function(index) {
         var letter = data.shift();
         var limit = data.shift();
@@ -128,17 +166,16 @@ function update_must_make(data) {
 
 // Aggregates input data and makes the ajax request
 function recalculate(elem) {
-    var inputs = [];
+    if ( ! elem) {
+        return;
+    }
 
-    $('input:text[id^="calc_grade_"]').each(function(index) {
-        fieldval = $(this).val() == '' ? 'switch_me' : $(this).val();
-        inputs.push($(this).attr('id') + '=' + fieldval);
-    });
+    var ungraded_inputs = getUngradedInputString();
 
     var num_empty = 0;
     var must_make_item_id = null;
 
-    if (must_make_enabled) {
+    if (mustMakeIsEnabled()) {
         $('input:text[id^="calc_grade_"]').each(function() {
             if ($(this).val() == '') {
                 num_empty++;
@@ -147,18 +184,22 @@ function recalculate(elem) {
         });
 
         if (num_empty == 1) {
-            inputs.push('must_make=' + must_make_item_id);
-            position_must_make(must_make_item_id);
+            ungraded_inputs.push('must_make=' + must_make_item_id);
         }
     }
 
-    $.post('rpc.php', { inputdata: inputs.join('|') }, function(data) {
+    $.post('rpc.php', { inputdata: ungraded_inputs.join('|') }, function(data) {
         var parts = data.split('|');
 
-        if (must_make_enabled && num_empty == 1) {
+        // cleans the array to ignore any "strict" errors that are returned by the ajax post
+        parts = cleanParts(parts);
+
+        if (mustMakeIsEnabled() && num_empty == 1) {
+            positionMustMake(must_make_item_id);
+
             var must_make_data = parts.pop().split('=')[1].split(',');
 
-            update_must_make(must_make_data);
+            updateMustMake(must_make_data);
         }
 
         for(var i = 0; i < parts.length; i++) {
@@ -171,7 +212,7 @@ function recalculate(elem) {
         }
     });
 
-    if (must_make_enabled) {
+    if (mustMakeIsEnabled()) {
         $('.must_make_arrow').remove();
 
         if (num_empty == 1) {
@@ -186,4 +227,15 @@ function recalculate(elem) {
             $('input[id^=calc_grade_]').removeClass('must_make_highlight');
         }
     }
+}
+
+// removes any errors from the first element of a given 'parts' array
+function cleanParts(parts) {
+    var tmpIndex = parts[0].indexOf('calc_');
+
+    if (tmpIndex > 0) {
+        parts[0] = parts[0].substring(tmpIndex);
+    }
+
+    return parts;
 }

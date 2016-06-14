@@ -111,39 +111,37 @@ if ($report->fill_table()) {
     echo $report->print_table(true);
 }
 
-$params = array(
-    'width' => '20%',
-    'class' => 'generaltable must_make_table',
-    'cellpadding' => '0',
-    'cellspacing' => '0',
-);
-
-$must_make_table = new html_table();
-$must_make_table->attributes = $params;
-$must_make_table->head = array('Must Make');
-$must_make_table->align= array('center');
-$must_make_table->data = array();
-
-$letters = grade_get_letters($context);
-
-array_pop($letters);
-
-foreach ($letters as $letter) {
-    $must_make_table->data[] = new html_table_row(array(
-        new html_table_cell(' ')
-    ));
-}
-
 $must_make_enabled = grade_get_setting($course->id, 'report_projected_must_make_enabled', !empty($CFG->grade_report_projected_must_make_enabled));
 
 echo '<input type="hidden" id="must_make_enabled" value="' . $must_make_enabled . '"/>';
 
 if ($must_make_enabled) {
+    $params = array(
+        'width' => '20%',
+        'class' => 'generaltable must_make_table',
+        'cellpadding' => '0',
+        'cellspacing' => '0',
+    );
+
+    $must_make_table = new html_table();
+    $must_make_table->attributes = $params;
+    $must_make_table->head = array('Must Make');
+    $must_make_table->align= array('center');
+    $must_make_table->data = array();
+
+    $letters = grade_get_letters($context);
+
+    array_pop($letters);
+
+    foreach ($letters as $letter) {
+        $must_make_table->data[] = new html_table_row(array(
+            new html_table_cell(' ')
+        ));
+    }
+
     echo '<div id = "must_make">';
     echo html_writer::table($must_make_table);
     echo '</div>';
 }
 
 echo $OUTPUT->footer();
-
-?>

@@ -191,6 +191,12 @@ class grade_report_projected extends grade_report {
                 $ct_data->scaleid = $grade_item->scaleid;
                 $ct_data->courseid = $grade_item->courseid;
 
+                // new fields 6/17/16
+                $ct_data->id = $grade_item->id;
+                $ct_data->excluded = $grade_grade->excluded;
+                $ct_data->aggregationcoef2 = $grade_item->aggregationcoef2;
+                $ct_data->weightoverride = $grade_item->weightoverride;
+
                 $this->ajax_data['course_total'] = $ct_data;
             }
 
@@ -285,8 +291,12 @@ class grade_report_projected extends grade_report {
                 // new fields 12/22/08
                 $item_data->plusfactor = $grade_item->plusfactor;
                 $item_data->multfactor = $grade_item->multfactor;
-
                 $item_data->excluded = $grade_grade->excluded;
+
+                // new fields 6/17/16
+                $item_data->id = $grade_grade->id;
+                $item_data->aggregationcoef2 = $grade_item->aggregationcoef2;
+                $item_data->weightoverride = $grade_item->weightoverride;
 
                 if ($grade_item->itemtype == 'category') {
                     $item_data->categoryid = $grade_item->iteminstance;
@@ -350,6 +360,10 @@ class grade_report_projected extends grade_report {
                             $ct_data->scaleid = $this->ajax_data['course_total']->scaleid;
                             $ct_data->courseid = $ct_cat->courseid;
 
+                            // new fields 6/17/16
+                            $ct_data->aggregationcoef = $this->ajax_data['course_total']->aggregationcoef;
+                            $ct_data->aggregationcoef2 = $this->ajax_data['course_total']->aggregationcoef2;
+
                             $this->ajax_data['course_total'] = $ct_data;
                         }
 
@@ -380,6 +394,10 @@ class grade_report_projected extends grade_report {
                             $ct_data->decimals = $grade_item->get_decimals();
                             $ct_data->scaleid = $this->ajax_data['course_total']->scaleid;
                             $ct_data->courseid = $ct_cat->courseid;
+
+                            // new fields 6/17/16
+                            $ct_data->aggregationcoef = $this->ajax_data['course_total']->aggregationcoef;
+                            $ct_data->aggregationcoef2 = $this->ajax_data['course_total']->aggregationcoef2;
 
                             $this->ajax_data['course_total'] = $ct_data;
                         }

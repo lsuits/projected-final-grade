@@ -327,8 +327,7 @@ function aggregate_category($items, $catid, $categories, $course_total=false) {
     $grade_values = $agg_data[0];
     $cat_items = $agg_data[1];
 
-    $cat_obj = new grade_category(array('aggregation' => $categories[$catid]->aggregation,
-       'droplow' => $categories[$catid]->droplow, 'keephigh' => $categories[$catid]->keephigh), false);
+    $cat_obj = grade_category::fetch(array('id'=>$catid));
 
     asort($grade_values, SORT_NUMERIC);
 
@@ -339,7 +338,7 @@ function aggregate_category($items, $catid, $categories, $course_total=false) {
     }
 
     if ($cat_obj->aggregation == GRADE_AGGREGATE_SUM) {
-        $agg_grade = projected_sum_grades($cat_obj, $cat_items, $grade_values);
+        $agg_grade = projected_sum_grades_new($cat_obj, $cat_items, $grade_values);
     } else {
         $cat_obj->grade_item->grademax = $categories[$catid]->grademax;
         $cat_obj->apply_limit_rules($grade_values, $items);
@@ -414,6 +413,30 @@ function projected_sum_grades($cat_obj, $items, $grade_values) {
     $cat_obj->apply_limit_rules($grade_values, $items);
 
     return array_sum($grade_values);
+}
+
+/**
+ * If we're aggregating a 'GRADE_AGGREGATE_SUM' category, return a sum adjusted for any custom weights
+ * 
+ * @param  grade_category  $cat_obj
+ * @param  array           $items         an array of grade_item "shell" objects
+ * @param  array           $grade_values  an array of float values with grade_item keys to be used for grade calculation
+ * @return float                          course total grade value
+ */
+function projected_sum_grades_new($cat_obj, $items, $grade_values) {
+    if (empty($items)) {
+        return null;
+    }
+
+    $grade_items = array();
+    foreach($items as $itemid => $gp) {
+        $grade_items[$itemid] = $gp->grade_item;
+    }
+
+    $weightoverrides = array();
+    $aggregated = $cat_obj->aggregate_values_and_adjust_bounds($grade_values, $grade_items, $weightoverrides);
+
+    return ($aggregated['grade']/100) * $aggregated['grademax'];
 }
 
 // Writes a response string to be handled by javascript when the request
